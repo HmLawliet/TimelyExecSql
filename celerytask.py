@@ -55,10 +55,12 @@ def exec_result(command):
     for j in range(Config_Mysql.exec_count):
         try:
             cur.execute(exec_sql)
-            db.commit()
         except Exception as e:
             flag = False
             pass
+    cur.close()
+    db.close()  
+      
     if not flag: exec_status = Config_Mysql.status_error
     else: exec_status = Config_Mysql.status_success
     spend_time = time.time()-start_time 
