@@ -1,7 +1,7 @@
 # TimelyExecSql
 Timing program for SQL statement execution
 
-You just need to modify configuration files, such as information about databases.
+You just need to modify configuration files（celeryconfig.py）, such as information about databases.
 
 You need to initialize celery before you use it, and install it through `pip install celery`
 
