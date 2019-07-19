@@ -1,10 +1,9 @@
-import pymysql
-from functools import wraps
-from abc import ABCMeta, abstractmethod
 import time
+import pymysql
+import timeout_decorator
+from functools import wraps
 from celeryconfig import Config_Mysql
-import logging
-
+from abc import ABCMeta, abstractmethod
 
 __slots__ = ['CommandHandler']
 
@@ -16,7 +15,6 @@ def decorator_database(func) -> object:
         try:
             db = pymysql.connect(Config_Mysql.hostname, Config_Mysql.username, Config_Mysql.password, Config_Mysql.database)
         except Exception as e:
-            logging.error('error: mysql connect failed; lineno:[%s] --- 17' % (__file__))
             return
         cur = db.cursor()
         res = None
@@ -25,8 +23,6 @@ def decorator_database(func) -> object:
         try:
             res = func(None, kwargs)
         except Exception as e:
-            logging.warning(
-                'warnging: exec sql error, return None; lineno:[%s] --- 26' % (__file__))
             db.rollback()
         cur.close()
         db.close()
@@ -45,17 +41,14 @@ class Base_Command(metaclass=ABCMeta):
     def exec_command(self, *args, **kwargs):
         pass
 
+@timeout_decorator.timeout(Config_Mysql.timeout)
 def exec_result(command):
     exec_id,exec_host,exec_user,exec_passwd,exec_database,exec_sql=command
-    exec_status = Config_Mysql.status_noexec
-    
     try:
         db = pymysql.connect(exec_host, exec_user, exec_passwd, exec_database)
         cur=db.cursor()
     except Exception as e:
-        logging.warning(
-            'warnging: connect mysql error, return None; lineno:[%s] --- 53' % (__file__))
-        return False,None,None,None 
+        return Config_Mysql.status_error,0,exec_id 
 
     flag = True
     start_time = time.time()
@@ -64,14 +57,12 @@ def exec_result(command):
             cur.execute(exec_sql)
             db.commit()
         except Exception as e:
-            logging.warning(
-                'warnging: exec sql error, return None; lineno:[%s] --- 64' % (__file__))
             flag = False
             pass
     if not flag: exec_status = Config_Mysql.status_error
     else: exec_status = Config_Mysql.status_success
     spend_time = time.time()-start_time 
-    return True, exec_status, round(spend_time/Config_Mysql.exec_count,2), exec_id 
+    return exec_status, round(spend_time/Config_Mysql.exec_count,2), exec_id 
 
 class Command(Base_Command):
     # 获取任务
@@ -86,8 +77,6 @@ class Command(Base_Command):
             res = cur.fetchall()
             return res
         except Exception as e:
-            logging.warning(
-                'warnging: exec sql error, return None; lineno:[%s] --- 84' % (__file__))
             raise e
 
     # 执行任务
@@ -99,12 +88,13 @@ class Command(Base_Command):
             cur = kwargs['cur']
             # 处理 sql的执行后的信息
             for command in commands:
-                r,s,t,i= exec_result(command)
-                if r:
-                    cur.execute(Config_Mysql.update_sql % (s, t, i))
-                    db.commit()
+                try:
+                    s,t,i= exec_result(command)
+                except Exception :
+                    s,t,i = Config_Mysql.status_error,Config_Mysql.timeout,command[0]  
+                cur.execute(Config_Mysql.update_sql % (s, t, i))
+                db.commit()
         except Exception as e:
-            logging.warning('warnging: exec sql error, return None; lineno:[%s] --- 104' % (__file__))
             raise e
 
 # 代理执行
@@ -118,6 +108,6 @@ class CommandHandler(Command):
 
 
 if __name__ == "__main__":
-
-    print(__file__)
+    c = CommandHandler()
+    c()
     pass
