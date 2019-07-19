@@ -26,13 +26,13 @@ class Config_Celery:
 
 
 class Config_Mysql:
-    hostname = 'yourhost' 
+    hostname = 'rm-wz9dawn1azrwj5789to.mysql.rds.aliyuncs.com' 
     username = 'root'
-    password = 'yourpassword'
-    database = 'yourdatabase'
-    status_noexec = 0  # 不执行的状态
+    password = 'Hello123456'
+    database = 'wpwl_web_pre'
     status_success = 1  # 成功状态
     status_error = 2   # 错误状态
+    timeout = 300 #执行sql语句的总的超时时间 默认300s
     exec_sql = 'select id,`host`,`user`,`password`,`database`,sentence from sql_review_applications where confirmed = 1 and run = 0;'
     exec_count = 10
     update_sql = 'update sql_review_applications set run = %s ,run_time= now(), run_duration= %s where id = %s ;'
@@ -45,5 +45,4 @@ class Config_Crontab:
 
     
 if __name__ == "__main__":
-
     pass
