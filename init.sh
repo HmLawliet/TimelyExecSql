@@ -2,6 +2,7 @@
 
 # 安装 celery
 pip install celery
+pip install -U 'celery[redis]'
 
 # 安装 timeout_decorator
 pip install timeout_decorator
@@ -14,7 +15,3 @@ pip install pymysql
 yum install epel-release
 
 yum install redis
-
-systemctl enable redis-server
-
-systemctl start redis.service
