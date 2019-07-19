@@ -24,4 +24,4 @@ The entry to the program is celeryapp.py.
 
 There are scripts that can run directly, but you are not sure if your system has execution rights. You can check the execution rights of the following files at the terminal ll. 
 
-If there are no privileges, please `chmod + X start. sh`, `chmod + X stop. sh` to grant execution privileges to the script.
+If there are no privileges, please `chmod +x init.sh`, `chmod +x start. sh`, `chmod +x stop. sh` to grant execution privileges to the script.
