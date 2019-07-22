@@ -64,7 +64,7 @@ def exec_result(command):
     if not flag: exec_status = Config_Mysql.status_error
     else: exec_status = Config_Mysql.status_success
     spend_time = time.time()-start_time 
-    return exec_status, round(spend_time/Config_Mysql.exec_count,2), exec_id 
+    return exec_status, round(spend_time/Config_Mysql.exec_count,3), exec_id 
 
 class Command(Base_Command):
     # 获取任务
@@ -94,7 +94,7 @@ class Command(Base_Command):
                     s,t,i= exec_result(command)
                 except Exception :
                     s,t,i = Config_Mysql.status_error,Config_Mysql.timeout,command[0]  
-                cur.execute(Config_Mysql.update_sql % (s, t, i))
+                cur.execute(Config_Mysql.update_sql % (s, t*1000, i))
                 db.commit()
         except Exception as e:
             raise e
