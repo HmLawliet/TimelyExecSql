@@ -93,7 +93,7 @@ class Command(Base_Command):
                 try:
                     s,t,i= exec_result(command)
                 except Exception :
-                    s,t,i = Config_Mysql.status_error,Config_Mysql.timeout,command[0]  
+                    s,t,i = Config_Mysql.status_error,round(Config_Mysql.timeout/Config_Mysql.exec_count,3),command[0]  
                 cur.execute(Config_Mysql.update_sql % (s, t*1000, i))
                 db.commit()
         except Exception as e:
