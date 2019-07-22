@@ -1,5 +1,6 @@
 import time
 import pymysql
+import datetime
 import timeout_decorator
 from functools import wraps
 from celeryconfig import Config_Mysql
@@ -90,11 +91,12 @@ class Command(Base_Command):
             cur = kwargs['cur']
             # 处理 sql的执行后的信息
             for command in commands:
+                run_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 try:
                     s,t,i= exec_result(command)
                 except Exception :
                     s,t,i = Config_Mysql.status_error,round(Config_Mysql.timeout/Config_Mysql.exec_count,3),command[0]  
-                cur.execute(Config_Mysql.update_sql % (s, t*1000, i))
+                cur.execute(Config_Mysql.update_sql % (s, run_time, t*1000, i))
                 db.commit()
         except Exception as e:
             raise e
