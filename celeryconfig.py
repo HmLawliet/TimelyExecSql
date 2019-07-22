@@ -35,7 +35,7 @@ class Config_Mysql:
     timeout = 300 #执行sql语句的总的超时时间 默认300s
     exec_sql = 'select id,`host`,`user`,`password`,`database`,sentence from sql_review_applications where confirmed = 1 and run = 0;'
     exec_count = 10
-    update_sql = 'update sql_review_applications set run = %s ,run_time= now(), run_duration= %s where id = %s ;'
+    update_sql = 'update sql_review_applications set run = %s ,run_time= "%s", run_duration= %s where id = %s ;'
 
 
 class Config_Crontab:
